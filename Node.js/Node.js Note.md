@@ -2,16 +2,18 @@
 
 ## 目录
 
-- [fs模块](#fs-模块)
-- [path模块](#path-模块)
-- [http模块](#http-模块)
+- [fs 模块](#fs-模块)
+- [path 模块](#path-模块)
+- [http 模块](#http-模块)
+- [模块作用域](#模块作用域)
+
 <br>
 <br>
 
 ## 主体内容
 
-### fs 模块
-主要用于读写文件
+### `fs` 模块
+- 主要用于读写文件
 
 1. 引入模块
 ```javascript
@@ -38,8 +40,8 @@
 ```
 
 
-### path 模块
-主要用于处理文件的 URL 路径
+### `path` 模块
+- 主要用于处理文件的 URL 路径
 
 1. 引入模块
 ```javascript
@@ -54,8 +56,8 @@
 3. More...
 
 
-### http 模块
-主要用于控制 Web 服务器
+### `http` 模块
+- 主要用于控制 Web 服务器
 
 1. 引入模块
 ```javascript
@@ -102,3 +104,17 @@
     // 为服务器绑定端口，开始运行
     server.listen(80, () => { console.log('服务器开始运行！') })
 ```
+
+
+### 模块作用域
+- 和函数作用域类似，在自定义模块中定义的 ***变量、方法等成员，只能在当前模块内被访问*** ，这种模块级别的访问限制，叫做模块作用域。
+
+- `module` 对象 ： 每个 js 模块中用于存储当前模块信息的对象
+    - `module.exports` 对象 : 模块内的一个对象，属性为想要暴露给外界的 ***模块内成员***
+
+    ```javascript
+    const module = require('./xxx.js'); // 此时 module 接收到的就是 xxx.js 内部的 module.exports 对象
+    ```
+
+    - `exports` 对象 ： 为了方便操作 Node.js 提供的对象，默认和 `module.exports` 指向同一个对象。当 `module.exports` 指向其他对象，则会与 `exports` 区别开，而**最终 `require()` 接收的是 `module.exports` 所指向的对象**。  
+    ***最好不要混用 `module.exports` 和 `exports` 以防二者指向不唯一***
