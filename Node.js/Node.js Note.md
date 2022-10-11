@@ -6,6 +6,8 @@
 - [path 模块](#path-模块)
 - [http 模块](#http-模块)
 - [模块作用域](#模块作用域)
+- [npm 包管理器](#npm-包管理器)
+- [express](#express)
 
 <br>
 <br>
@@ -16,42 +18,42 @@
 - 主要用于读写文件
 
 1. 引入模块
-```javascript
+    ```javascript
     const fs = require('fs')
-```
+    ```
 
 2. 读取文件
-```javascript
+    ```javascript
     fs.readFile(path, type, function(err, data){})
     // egg:
     fs.readFile('./demo.html', 'utf-8', (err, dataStr) => {
         if (err) { return console.log(err.message) }
         // dataStr ...
     })
-```
+    ```
 
 3. 写入文件
-``` javascript
+    ``` javascript
     fs.writeFile(path, data, type, function(err) {})
     // egg:
     fs.writeFile('./txt.html', text, 'utf-8', (err) => {
         if (err) { return console.log(err.message) }
     })
-```
+    ```
 
 
 ### `path` 模块
 - 主要用于处理文件的 URL 路径
 
 1. 引入模块
-```javascript
+    ```javascript
     const path = require('path')
-```
+    ```
 
 2. 拼接 api (往往配合__dirname)
-```javascript
+    ```javascript
     path.join(__dirname, url)
-```
+    ```
 
 3. More...
 
@@ -60,12 +62,12 @@
 - 主要用于控制 Web 服务器
 
 1. 引入模块
-```javascript
+    ```javascript
     const http = require('http')
-```
+    ```
 
 2. 控制服务器流程
-```javascript
+    ```javascript
     // 引用模块
     const http = require('http')
     const fs = require('fs')
@@ -103,7 +105,7 @@
 
     // 为服务器绑定端口，开始运行
     server.listen(80, () => { console.log('服务器开始运行！') })
-```
+    ```
 
 
 ### 模块作用域
@@ -111,10 +113,118 @@
 
 - `module` 对象 ： 每个 js 模块中用于存储当前模块信息的对象
     - `module.exports` 对象 : 模块内的一个对象，属性为想要暴露给外界的 ***模块内成员***
-
-    ```javascript
-    const module = require('./xxx.js'); // 此时 module 接收到的就是 xxx.js 内部的 module.exports 对象
-    ```
+        ```javascript
+        const module = require('./xxx.js'); // 此时 module 接收到的就是 xxx.js 内部的 module.exports 对象
+        ```
 
     - `exports` 对象 ： 为了方便操作 Node.js 提供的对象，默认和 `module.exports` 指向同一个对象。当 `module.exports` 指向其他对象，则会与 `exports` 区别开，而**最终 `require()` 接收的是 `module.exports` 所指向的对象**。  
     ***最好不要混用 `module.exports` 和 `exports` 以防二者指向不唯一***
+
+
+
+## npm 包管理器
+第三方模块又称为包，而安装 Node.js 环境自带包管理器 npm 便于我们安装 管理 和使用包。
+
+- 安装包  
+`npm install 包名`  
+    - 安装包  
+    `npm install express`
+
+    - -D : 安装开发依赖包  
+    `npm install webpack -D`
+
+    - -g : 安装全局包  
+    `npm install nodemon -g`
+
+- 卸载包  
+`npm uninstall 包名`
+    - 卸载包  
+    `npm uninstall express`  
+    `npm uninstall webpack`
+
+    - 卸载全局包  
+    `npm uninstall nodemon -g`
+
+
+
+
+## express 
+一个第三方**包**，是基于 Node.js 平台，快速、开放、极简的 **Web 开发框架**。  
+提供了快速创建 Web 服务器的便捷方法。
+
+- 安装  
+    `npm install express`
+
+- 创建基本的 web 服务器
+    ```js
+    const express = require('express')          // 导入 express 模块  
+    const app = express()                       // 实例化
+    
+    // 挂载路由，监听 GET 请求
+    app.get('/index', (req, res) => { 
+        // do sth.
+        res.send( data )                        //将 data 响应给客户端
+    })    
+
+    app.listen(80, () => { ... })               //  在80端口启动服务器
+    ```
+
+- 获取 url 中的一些参数  
+    ```js
+    // eg: url = http://localhost/user/18/xiaoming?search1=xx&search2=yy
+
+    // ":" 符号匹配动态参数, 匹配到的值存于 req.params 对象中
+    app.get('/user/:id/:name', (req, res) => {  // id, name 为接收值的变量名，由程序员自定义
+        console.log(req.params) // { id : 18, name : xiaoming }
+
+        //req.query 对象查询url中的搜索
+        console.log(req.query)  // { search1 : xx, search2 : yy} 
+    })
+    ```
+
+- 路由  
+    - 定义  
+    在 Express 中，路由指的是客户端的请求与服务器处理函数之间的映射关系。Express 中的路由分 3 部分组成，分别是请求的类型、请求的 URL 地址、处理函数。格式如下  
+        ```js
+        app.METHOD(PATH,HANDLE)
+        // eg: METHOD == get, PATH == '/', HANDLE == function(req, res)
+        app.get('/',function(req, res) {
+            ...
+        })
+        ```
+
+    - 路由匹配顺序  
+    每当一个请求到达服务器之后,***顺序匹配每一个路由***。当请求方式和URL都匹配成功时调用对应路由的 function 处理请求。
+
+    - 路由模块化  
+    为了方便对路由进行模块化的管理，Express 不建议将路由直接挂载到 app 上，而是推荐将路由抽离为单独的模块。将路由抽离为单独模块的步骤如下：
+        1. 创建路由模块对应的 .js 文件
+        1. 调用 `express.Router()` 函数创建路由对象
+        1. 向路由对象上挂载具体的路由
+        1. 使用 `module.exports` 向外共享路由对象
+        1. 使用 `app.use()` 函数注册路由模块
+
+            ```js
+            // ----------router/user.js------------
+            // 引入 express 模块并实例化 router
+            const express = require('express')
+            const router = express.Router()
+
+            // 为 router 对象挂载路由
+            router.get('/user',(req, res) => { ... })
+            router.post('/user',(req, res) => { ... })  // 此时匹配路由的 path === /user
+            
+
+            // 向外暴露 router 路由对象
+            module.exports = router
+
+            // --------------index.js--------------
+            // 导入路由模块
+            const userRouter = require('./router/user.js')
+            
+            // 使用 app.use() 注册路由模块,添加统一访问前缀 /api
+            app.use('/api', userRouter)                 // 此时匹配路由的 path === /api/user
+            
+            ```
+
+    
