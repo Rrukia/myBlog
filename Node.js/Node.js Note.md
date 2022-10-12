@@ -185,6 +185,7 @@
 - 路由  
     - 定义  
     在 Express 中，路由指的是客户端的请求与服务器处理函数之间的映射关系。Express 中的路由分 3 部分组成，分别是请求的类型、请求的 URL 地址、处理函数。格式如下  
+    
         ```js
         app.METHOD(PATH,HANDLE)
         // eg: METHOD == get, PATH == '/', HANDLE == function(req, res)
@@ -227,4 +228,99 @@
             
             ```
 
+- 中间件  
+实际上就是对请求达到路由前进行预处理的函数。将这些函数独立成一个个模块，称之为中间件。  
+
+
+    - 函数模板
+
+        ```js
+        // 相比一般路由处理函数，多一个 next 参数
+        let middleWare = function(req, res, next) {
+
+            // do sth...
+
+            next()  // 中间件处理结束，必须调用 next() 
+        }
+        ```
+
+    - 挂载方式
+
+        ```js
+        app.get('/', middleWare, (req, res) => {
+            // do sth...
+
+            res.send(data)
+        })
+        ```
+
+    - 中间件模块化  
+    使用单独的 js 文件独立出中间件模块，减少代码冗余，提升可复用性。类似 包 、模块。  
+    ***给路由用的包***
+
+        ```javascript
+        // ---------myMiddleWare.js-----------
+        function myMiddleWare(req, res, next) {
+            // do sth...
+
+            next()  // next
+        }
+
+        module.exports = myMiddleWare
+
+        // ---------main.js------------
+        const express = require('express')
+        const myRouter = require('./router/myRouter.js')
+        const myMiddleWare = require('./myMiddleWare.js')
+
+        let app = express()
+
+        app.use(myMiddleWare)   // 注册启用全局中间件
+        app.use(myRouter)   // 注册启用路由
+
+        app.listen(80, () => { ... })
+        ```
+
+    - 部署顺序  
+    当一个请求到达服务器，中间件和路由按顺序匹配并处理。因此中间件应在路由之前部署，并且使用 next() 使请求继续前往下一个处理步骤。
     
+
+- CORS跨域  
+cross-origin resource sharing 跨域资源共享，通过添加**响应头**使浏览器不拦截服务器响应给客户端的资源
+    - 在路由中手动添加
+
+        ```js
+
+        router.post(':3000/api', (req, res) => {
+            // do sth...
+
+            res.setHeader('Access-Control-Allow-Origin', '*')   // * 通配符
+
+            res.send(data)
+        })
+        ```
+
+    - 使用cors中间件
+
+        ```js
+        // --------cmd--------
+        npm install cors
+
+        //---------main.js-------
+        const cors = require('cors')    // 导入
+        app.use(cors())     // 配置
+
+        ```
+
+- JSONP  
+使用 script 发送 GET 请求绕开浏览器拦截进行跨域而非 XMLHttpRequest 不属于 AJAX   
+原理：接收搜索字段，将 callback 函数和需要响应的资源拼接成字符串返回
+
+    ```js
+    router.get('/api/jsonp', (req, res) => {
+        let funcName = req.query.callback
+        let data = ...
+        
+        // 返回 funcName(data)给 script 标签进行函数调用
+        res.send(`${funcName}(${data})`)
+    })
